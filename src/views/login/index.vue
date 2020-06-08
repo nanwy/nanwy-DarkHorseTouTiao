@@ -20,25 +20,31 @@
       <van-field
         v-model="user.code"
         clearable
+        
         icon-prefix="toutiao"
         left-icon="yanzhengma"
         placeholder="请输入验证码"
       >
-        <template #button>
-          <van-count-down
-    v-if="isCountDownShow"
-    :time="1000 * 60"
-    format="ss s"
-    @finish="isCountDownShow = false"
-  />
+        <template #button
+        >
+          
           <van-button
-            v-else
+            
   class="send-btn"
   size="mini"
   round
+ 
   :loading="isSendSmsLoading"
+  :disabled="isCountDownShow"
   @click.prevent="onSendSms"
-          >发送验证码</van-button>
+          ><van-count-down
+ v-if="isCountDownShow"
+    :time="1000 * 60"
+    format="ss s"
+    class="denglu"
+    @finish="isCountDownShow = false"
+  />
+         <span v-else> 发送验证码</span></van-button>
         </template>
       </van-field>
     </van-cell-group>
@@ -77,7 +83,7 @@ export default {
   async onLogin () {
   // 开始转圈圈
   if(this.user.mobile.length < 11){
-    this.$toast.fail('登录失败，手机号格式错误')
+    this.$toast('手机号格式有误')
 
     return
   }
@@ -93,17 +99,23 @@ export default {
   })
 
   try {
-    const res = await login(this.user)
-    console.log('登录成功', res)
+     const { data } = await login(this.user)
+    console.log('登录成功', data)
     // 提示 success 或者 fail 的时候，会先把其它的 toast 先清除
     this.$toast.success('登录成功')
+    this.$store.commit('setUser', data.data)
   } catch (err) {
     console.log('登录失败', err)
     this.$toast.fail('登录失败，手机号或验证码错误')
   }
 },
     async onSendSms () {
-     
+     if(this.user.mobile.length < 11){
+    this.$toast('手机号格式有误')
+
+    return
+  }
+
   try {
     // 校验手机号码
     // await this.$refs['login-form'].validate('mobile')
@@ -114,12 +126,14 @@ export default {
 
     // 短信发出去了,显示倒计时，关闭发送按钮
    this.isCountDownShow = true
-
+  console.log(this.isCountDownShow);
+  
     // 倒计时结束 -> 隐藏倒计时，显示发送按钮（监视倒计时的 finish 事件处理）
   } catch (err) {
     // try 里面任何代码的错误都会进入 catch
     // 不同的错误需要有不同的提示，那就需要判断了
     let message = ''
+    this.isCountDownShow = false
     if (err && err.response && err.response.status === 429) {
       // 发送短信失败的错误提示
       message = '发送太频繁了，请稍后重试'
@@ -142,7 +156,7 @@ export default {
   this.isSendSmsLoading = false
 
   // 发送失败，显示发送按钮，关闭倒计时
-  this.isCountDownShow = false
+  // 
 }
   }
 };
