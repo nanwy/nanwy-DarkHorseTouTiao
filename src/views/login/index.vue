@@ -10,12 +10,17 @@
     <!-- /导航栏 -->
 
     <!-- 登录表单 -->
+  <van-form
+  validate-first
+  ref="login-form"
+  >
     <van-cell-group>
       <van-field
         v-model="user.mobile"
         icon-prefix="toutiao"
         left-icon="shouji"
         placeholder="请输入手机号"
+        name="mobile"
       />
       <van-field
         v-model="user.code"
@@ -25,6 +30,7 @@
         left-icon="yanzhengma"
         placeholder="请输入验证码"
       >
+  
         <template #button
         >
           
@@ -48,6 +54,7 @@
         </template>
       </van-field>
     </van-cell-group>
+  </van-form>
     <div class="login-btn-wrap">
       <van-button class="login-btn" type="info" block @click="onLogin">登录</van-button>
     </div>
@@ -118,7 +125,7 @@ export default {
 
   try {
     // 校验手机号码
-    // await this.$refs['login-form'].validate('mobile')
+    await this.$refs['login-form'].validate('mobile')
 
     // 验证通过，请求发送验证码
     this.isSendSmsLoading = true // 展示按钮的 loading 状态，防止网络慢用户多次点击触发发送行为
@@ -134,6 +141,8 @@ export default {
     // 不同的错误需要有不同的提示，那就需要判断了
     let message = ''
     this.isCountDownShow = false
+    console.log('shibai');
+    
     if (err && err.response && err.response.status === 429) {
       // 发送短信失败的错误提示
       message = '发送太频繁了，请稍后重试'
